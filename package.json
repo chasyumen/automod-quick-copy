@@ -1,0 +1,32 @@
+{
+  "name": "automod-quick-copy",
+  "version": "1.0.0",
+  "description": "quickly copy discord automod configurations to your servers",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "tsc && node out/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chasyumen/automod-quick-copy.git"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "chasyumen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chasyumen/automod-quick-copy/issues"
+  },
+  "homepage": "https://github.com/chasyumen/automod-quick-copy#readme",
+  "dependencies": {
+    "@discordjs/builders": "1.11.3",
+    "discord.js": "14.22.1",
+    "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
