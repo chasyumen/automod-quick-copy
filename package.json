@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "quickly copy discord automod configurations to your servers",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "node test.js",
-    "start": "tsc && node out/index.js"
+    "start": "tsc && node out/src/index.js"
   },
   "repository": {
     "type": "git",

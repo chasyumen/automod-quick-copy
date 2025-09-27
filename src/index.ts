@@ -1,7 +1,8 @@
-import { AllowedMentionsTypes, GatewayIntentBits, Client, Guild, GuildMember, TextChannel, User, Events, AutoModerationRuleCreateOptions, AutoModerationActionOptions } from "discord.js";
-import { config } from "dotenv";
+import { AllowedMentionsTypes, GatewayIntentBits, Client, Guild, GuildMember, TextChannel, User, Events, AutoModerationRuleCreateOptions, AutoModerationActionOptions, GuildBasedChannel, TextBasedChannel } from "discord.js";
+import { config as ConfigDotEnv } from "dotenv";
+import config from "./../config.json" with { type: "json" };
 
-config({ quiet: true });
+ConfigDotEnv({ quiet: true });
 
 const client = new Client({
     intents: [
@@ -17,14 +18,38 @@ const client = new Client({
 });
 
 client.on(Events.ClientReady, async () => {
-    const cloneSourceGuild = client.guilds.cache.get("1330457097447407707");
-    const cloneTargetGuild = client.guilds.cache.get("1330457145107419167");
-    if (!cloneSourceGuild || !cloneTargetGuild) return console.log("Either or both of source or target guild ID is invalid.")
+    console.log(`Starting process...`);
+    const cloneSourceGuild = client.guilds.cache.get(config.source_guild_id);
+    if (!cloneSourceGuild) {
+        console.log("\x1b[31mSource guild ID is invalid\x1b[0m");
+        return exit();
+    }
+    console.log(`Clone source guild is: ${cloneSourceGuild.name} (${cloneSourceGuild.id})`);
+    const cloneTargetGuild = client.guilds.cache.get(config.target_guild_id);
+    if (!cloneTargetGuild) {
+        console.log("\x1b[31mTarget guild ID is invalid.\x1b[0m");
+        return exit();
+    }
+    console.log(`Clone target guild is: ${cloneTargetGuild.name} (${cloneTargetGuild.id})`);
+    let alterChannelOverride: TextBasedChannel | null = null;
+    if (config.alert_channel_override_id !== null) {
+        let targetChannel = cloneTargetGuild.channels.cache.get(config.alert_channel_override_id);
+        if (targetChannel && targetChannel.isTextBased()) {
+            alterChannelOverride = targetChannel;
+            console.log(`Alert channel override is set to ${targetChannel.name} (${targetChannel.id})`);
+        }
+    }
     try {
         const sourceAutomodData = await cloneSourceGuild.autoModerationRules.fetch();
-        if (!sourceAutomodData) return;
+        if (!sourceAutomodData) {
+        console.log("Source guild automod rule fetch failed.");
+        return exit();
+    }
         const targetAutomodData = await cloneTargetGuild.autoModerationRules.fetch();
-        if (!targetAutomodData) return;
+        if (!targetAutomodData) {
+        console.log("Target guild automod rule fetch failed.");
+        return exit();
+    }
         const cloneFormattedData: AutoModerationRuleCreateOptions[] = sourceAutomodData.map(automodSource => {
             let automodToSet: AutoModerationRuleCreateOptions = {
                 name: automodSource.name,
@@ -49,6 +74,12 @@ client.on(Events.ClientReady, async () => {
                 })(automodSourceAction);
                 if (automodSourceAction.type !== 2) return automodSaveAction;
 
+                if (alterChannelOverride) {
+                    if (!automodSaveAction.metadata) automodSaveAction.metadata = {};
+                    automodSaveAction.metadata.channel = alterChannelOverride.id;
+                    return automodSaveAction;
+                }
+
                 if (!automodSourceAction.metadata.channelId) return null;
                 if (!cloneSourceGuild.channels.cache.has(automodSourceAction.metadata.channelId)) return null;
                 let sourceChannel = cloneSourceGuild.channels.cache.get(automodSourceAction.metadata.channelId);
@@ -57,7 +88,7 @@ client.on(Events.ClientReady, async () => {
                 if (!targetGuildChannel) return null;
                 if (!automodSaveAction.metadata) automodSaveAction.metadata = {};
                 automodSaveAction.metadata.channel = targetGuildChannel.id;
-                return automodSaveAction
+                return automodSaveAction;
             }).filter(x => x !== null);
 
             automodToSet["exemptChannels"] = automodSource.exemptChannels.filter(sourceChannel => 1 <= cloneTargetGuild.channels.cache.filter(targetChannel => sourceChannel.name == targetChannel.name).size).map(sourceChannel => {
@@ -105,9 +136,13 @@ client.on(Events.ClientReady, async () => {
         throw new Error(`Error occured: ${err}`)
     }
     console.log("Process finished");
+    exit();
+});
+
+async function exit() {
     await client.destroy();
     process.exit(0);
-});
+}
 
 client.login(process.env.DISCORD_TOKEN);
 
