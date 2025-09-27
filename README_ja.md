@@ -1,4 +1,4 @@
-`# automod-quick-copy
+# automod-quick-copy
 サーバー間でのAutoMod設定の同期をスムーズに実行
 
 ⚠ 宛先のサーバーのAutoMod構成が破損、あるいは消失する可能性があります。
