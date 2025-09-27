@@ -25,7 +25,7 @@ Discord Bot Token is required. Get one at [Developer Portal](https://discord.com
 
 - .env
 ```
-DISCORD_TOKEN=ENTERYOURTOKENHERE //Replace with one you found at developer portal
+DISCORD_TOKEN=ENTERYOURTOKENHERE # Replace with one you found at developer portal
 ```
 
 Enter the source guild and target guild id in the config.json.

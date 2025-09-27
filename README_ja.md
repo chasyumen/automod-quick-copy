@@ -25,7 +25,7 @@ Discord Botのトークンが必要です。[Developer Portal](https://discord.c
 
 - .env
 ```
-DISCORD_TOKEN=ENTERYOURTOKENHERE //Replace with one you found at developer portal
+DISCORD_TOKEN= # Developer Portal内で取得したトークンを入力
 ```
 
 source_guild_id に、設定の移行元のサーバーID、 target_guild_id に設定の移行先のサーバーIDを入力してください。
